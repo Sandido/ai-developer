@@ -13,8 +13,8 @@ def configure_sidebar():
         st.session_state.selected_option = "Chat"
     if st.sidebar.button("💬 Chat"):
         st.session_state.selected_option = "Chat"
-    if st.sidebar.button("🤖 Multi-Agent"):
-        st.session_state.selected_option = "Multi-Agent"
+    if st.sidebar.button("🤖 Agents"):
+        st.session_state.selected_option = "Agents"
         
     return st.session_state.selected_option
 
@@ -29,7 +29,7 @@ def render_chat_ui(title, on_submit):
             if title == "Chat":
                 st.session_state.chat_history = []
                 reset_chat_history()
-            elif title == "Multi-Agent":
+            elif title == "Agents":
                 st.session_state.multi_agent_history = []
   
     # Styling adjustments for the form
@@ -97,7 +97,7 @@ def multi_agent():
     #Display multi-agent chat history
         display_chat_history(st.session_state.multi_agent_history)
         
-    render_chat_ui("Multi-Agent", on_multi_agent_submit)
+    render_chat_ui("Agents", on_multi_agent_submit)
 
 
 def display_chat_history(chat_history):
@@ -113,10 +113,10 @@ def main():
     """Main function to run the app."""
     # st.set_page_config(page_title="AI Workshop", layout="wide")
     chosen_operation = configure_sidebar()
-    st.markdown("<h2 style='text-align:center;'>Welcome to the AI Workshop for Developers</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>Translation Classroom</h2>", unsafe_allow_html=True)
     if chosen_operation == "Chat":
         chat()
-    elif chosen_operation == "Multi-Agent":
+    elif chosen_operation == "Agents":
         multi_agent()
 
 if __name__ == "__main__":
