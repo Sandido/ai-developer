@@ -12,14 +12,13 @@ from semantic_kernel.contents.chat_message_content import ChatMessageContent
 from semantic_kernel.contents.utils.author_role import AuthorRole
 from semantic_kernel.kernel import Kernel
 
-ROOKIE_INSTRUCTIONS = "You are a rookie at spanish and occassionally make mistakes. Don't respond to the user input. \
-        You create a brand new sentence in English that you make up, then try to translate it to Spanish with a couple mistakes for your teacher to fix."
+ROOKIE_INSTRUCTIONS = "You are a rookie at japanese and occassionally make mistakes. Don't respond to the user input. \
+        You create a brand new sentence in English that you make up, then try to translate it to Japanese with a couple mistakes for your teacher to fix."
 
-TEACHER_INSTRUCTIONS = "You are an expert at translating between english and spanish. \
-        You fix errors in Spanish presented by the rookie agent and provide a corrected translation. You need to explain the improvements in english. \
-        Then return the string &&&."
+TRANSLATOR_INSTRUCTIONS = "Any text not in english you receive should be translated to english and presented to the user then append the string &&&. \
+        If it's in english, ignore it &&&."
 
-
+from plugins.translators_plugin import TranslatorPlugins
 
 
 class ApprovalTerminationStrategy(TerminationStrategy):
@@ -33,31 +32,33 @@ class ApprovalTerminationStrategy(TerminationStrategy):
 async def run_multi_agent(input: str):
     """Run the multi-agent system. Setup the kernel, agents, and group chat with a termination strategy."""
     service_id_rookie ="rookie"
-    service_id_teacher = "teacher"
+    service_id_teacher = "translator"
     # Define the Kernel
     kernel = Kernel()
-    kernel.add_service(AzureChatCompletion(service_id=service_id_rookie))
-    settings = kernel.get_prompt_execution_settings_from_service_id(service_id=service_id_rookie)
+    # kernel.add_service(AzureChatCompletion(service_id=service_id_rookie))
+    # settings = kernel.get_prompt_execution_settings_from_service_id(service_id=service_id_rookie)
     kernel.add_service(AzureChatCompletion(service_id=service_id_teacher))
     settings = kernel.get_prompt_execution_settings_from_service_id(service_id=service_id_teacher)
     settings.function_choice_behavior = FunctionChoiceBehavior.Auto()
 
-    rookie_agent = ChatCompletionAgent(
-        id=service_id_rookie, 
-        kernel=kernel, 
-        name="Rookie", 
-        instructions= ROOKIE_INSTRUCTIONS,
-    )
-    teacher_agent = ChatCompletionAgent(
+    kernel.add_plugin(TranslatorPlugins(kernel), plugin_name="TranslatorPlugins")
+    
+    # rookie_agent = ChatCompletionAgent(
+    #     id=service_id_rookie, 
+    #     kernel=kernel, 
+    #     name="Rookie", 
+    #     instructions= ROOKIE_INSTRUCTIONS,
+    # )
+    translator_agent = ChatCompletionAgent(
         id=service_id_teacher, 
         kernel=kernel, 
-        name="Teacher", 
-        instructions=TEACHER_INSTRUCTIONS,
+        name="Translator", 
+        instructions=TRANSLATOR_INSTRUCTIONS,
     )
 
     chat = AgentGroupChat(
-        agents=[ teacher_agent, rookie_agent],
-        termination_strategy=ApprovalTerminationStrategy(agents=[teacher_agent], maximum_iterations=6),
+        agents=[ translator_agent],
+        termination_strategy=ApprovalTerminationStrategy(agents=[translator_agent], maximum_iterations=6),
     )
     await chat.add_chat_message(ChatMessageContent(role=AuthorRole.USER, content=input))
 

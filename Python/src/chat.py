@@ -2,13 +2,13 @@ import asyncio
 import logging
 from dotenv import load_dotenv
 from semantic_kernel import Kernel
-from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, OpenAITextToImage, AzureTextEmbedding
+from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, AzureTextEmbedding
 from semantic_kernel.connectors.ai.function_choice_behavior import FunctionChoiceBehavior
-from semantic_kernel.connectors.openapi_plugin import OpenAPIFunctionExecutionParameters
 from semantic_kernel.contents.chat_history import ChatHistory
 from semantic_kernel.functions import KernelArguments
 
 from plugins.ai_search_plugin import AiSearchPlugin
+from plugins.translators_plugin import TranslatorPlugins
 from openai import AzureOpenAI
 import os
 
@@ -35,14 +35,20 @@ def initialize_kernel():
 
     kernel.add_plugin(AiSearchPlugin(kernel), plugin_name="AISearch") 
 
+    kernel.add_plugin(TranslatorPlugins(kernel), plugin_name="TranslatorPlugins") 
+
     return kernel
 
 
 async def process_message(user_input):
     logger.info(f"Processing user message: {user_input}")
     kernel = initialize_kernel()
+
+    system_message = """You are a helpful assistant with translation capabilities.
+    If the user wants to translate text from one language to another, use the appropriate translation function.
+    Otherwise if the user speaks in english, respond conversationally."""
     chat_function = kernel.add_function(
-        prompt="{{$chat_history}}{{$user_input}}",
+        prompt=f"{system_message}\n\n{{$chat_history}}{{$user_input}}",
         plugin_name="ChatBot",
         function_name="Chat",
     )
