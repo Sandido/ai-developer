@@ -1,3 +1,12 @@
+# How to use:
+python -m venv .venv
+
+.\.venv\Scripts\Activate
+
+pip install -r requirements.txt
+
+streamlit run app.py
+
 # AI Developer - Azure AI Foundry and Semantic Kernel Fundamentals
 
 ## Introduction

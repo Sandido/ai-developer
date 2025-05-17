@@ -6,3 +6,6 @@ fastapi
 pandas
 uvicorn
 streamlit
+pydantic
+autogen-agentchat
+autogen-ext[openai,azure]

@@ -45,4 +45,3 @@ class AiSearchPlugin:
                 f"    {result.record.parent_id} (with {result.record.title}, and content: {result.record.content})"
             )
         return result_list
-
