@@ -10,6 +10,10 @@ from models.employee_handbook_model import EmployeeHandbookModel
 from openai import AzureOpenAI
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field, validator, ConfigDict
+import logging
+# Add Logger
+logger = logging.getLogger(__name__)
+
 
 load_dotenv(override=True)
 
@@ -91,7 +95,7 @@ class TranslationResponse(BaseModel):
 
 class TranslatorPlugins:
     def __init__(self, kernel: Kernel):
-        print("Translation Plugin init !!!!!!!!!!!!")
+        logger.info("Translation Plugin init !!!!!!!!!!!! logger")
         self.config = OpenAIConfig.from_env()
         self.openai_client = AzureOpenAI(
             api_key=self.config.api_key,  
@@ -99,9 +103,9 @@ class TranslatorPlugins:
             api_version=self.config.api_version
         )
         
-    @kernel_function(description="Translates any text in spanish to english.", name="translate_spanish_to_english")
+    @kernel_function(description="Translates spanish text to english.", name="translate_spanish_to_english")
     async def translate_spanish_to_english(self, query_str: Annotated[str, "Strings in spanish to be translated to english."]) -> Annotated[str, "Translated string in english"]:
-        print("TranslationRequest spanish to english!!!!!!!!!!!!")
+        logger.info("Translate spanish to english!!!!!!!!!!!! logger")
         translation_request = TranslationRequest(
             text=query_str,
             source_language="Spanish",
@@ -110,9 +114,9 @@ class TranslatorPlugins:
         
         return await self.translate(translation_request)
     
-    @kernel_function(description="Translates any text in japanese to english.", name="translate_japanese_to_english")
+    @kernel_function(description="Translates japanese text to english.", name="translate_japanese_to_english")
     async def translate_japanese_to_english(self, query_str: Annotated[str, "Strings in japanese to be translated to english."]) -> Annotated[str, "Translated string in english"]:
-        print("TranslationRequest japanese to english!!!!!!!!!!!!")
+        logger.info("Translate japanese to english!!!!!!!!!!!! logger")
         translation_request = TranslationRequest(
             text=query_str,
             source_language="Japanese",
@@ -121,9 +125,9 @@ class TranslatorPlugins:
         
         return await self.translate(translation_request)
     
-    @kernel_function(description="Translates any text in hindi to english.", name="translate_hindi_to_english")
+    @kernel_function(description="Translates hindi text to english.", name="translate_hindi_to_english")
     async def translate_hindi_to_english(self, query_str: Annotated[str, "Strings in hindi to be translated to english."]) -> Annotated[str, "Translated string in english"]:
-        print("Translate hindi to english!!!!!!!!!!!!")
+        logger.info("Translate hindi to english!!!!!!!!!!!! logger")
         translation_request = TranslationRequest(
             text=query_str,
             source_language="Hindi",
@@ -132,9 +136,9 @@ class TranslatorPlugins:
         
         return await self.translate(translation_request)
     
-    @kernel_function(description="Translates text between specified languages.", name="translate")
+    @kernel_function(description="Only translates text between specified languages when 2 languages are provided.", name="translate")
     async def translate(self, request: TranslationRequest) -> str:
-        print("Generic Translate call!!!!!!!!!!!!")
+        logger.info("Generic Translate call!!!!!!!!!!!! logger")
         """Translate text between languages."""
         # Create structured messages using our new models
         messages = [
