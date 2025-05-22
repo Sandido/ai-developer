@@ -24,7 +24,7 @@ from plugins.translators_plugin import TranslatorPlugins
 
 class ApprovalTerminationStrategy(TerminationStrategy):
     """A strategy for determining when an agent should terminate."""
- 
+
     async def should_agent_terminate(self, agent, history):
         """Check if the agent should terminate."""
         return any("&&&" in message.content for message in history)
@@ -43,17 +43,17 @@ async def run_multi_agent(input: str):
     settings.function_choice_behavior = FunctionChoiceBehavior.Auto()
 
     kernel.add_plugin(TranslatorPlugins(kernel), plugin_name="TranslatorPlugins")
-    
+
     # rookie_agent = ChatCompletionAgent(
-    #     id=service_id_rookie, 
-    #     kernel=kernel, 
-    #     name="Rookie", 
+    #     id=service_id_rookie,
+    #     kernel=kernel,
+    #     name="Rookie",
     #     instructions= ROOKIE_INSTRUCTIONS,
     # )
     translator_agent = ChatCompletionAgent(
-        id=service_id_teacher, 
-        kernel=kernel, 
-        name="Translator", 
+        id=service_id_teacher,
+        kernel=kernel,
+        name="Translator",
         instructions=TRANSLATOR_INSTRUCTIONS,
     )
 

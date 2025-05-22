@@ -15,7 +15,7 @@ def configure_sidebar():
         st.session_state.selected_option = "Chat"
     if st.sidebar.button("🤖 Multi-Agent"):
         st.session_state.selected_option = "Multi-Agent"
-        
+
     return st.session_state.selected_option
 
 
@@ -31,14 +31,14 @@ def render_chat_ui(title, on_submit):
                 reset_chat_history()
             elif title == "Multi-Agent":
                 st.session_state.multi_agent_history = []
-  
+
     # Styling adjustments for the form
     st.markdown(
     """
     <style>
     div[data-testid="stForm"] {
-        border: none; 
-        padding: 0; 
+        border: none;
+        padding: 0;
         box-shadow: none;
     }
     </style>
@@ -49,7 +49,7 @@ def render_chat_ui(title, on_submit):
     with st.form(key="chat_form", clear_on_submit=True):
         user_input = st.text_input( "Message Input", placeholder="Type a message...", key="user_input", label_visibility="collapsed")
         send_clicked = st.form_submit_button("Send")
-        
+
         if send_clicked:
             on_submit(user_input)
 
@@ -70,7 +70,7 @@ def chat():
             except Exception as e:
                 logging.error(f"Error processing message: {e}")
                 st.error("An error occurred while processing your message.")
-        
+
     # Display chat history
         display_chat_history(st.session_state.chat_history)
 
@@ -93,10 +93,10 @@ def multi_agent():
             except Exception as e:
                 logging.error(f"Error in multi-agent system: {e}")
                 st.error("An error occurred while processing the multi-agent request.")
-        
+
     #Display multi-agent chat history
         display_chat_history(st.session_state.multi_agent_history)
-        
+
     render_chat_ui("Multi-Agent", on_multi_agent_submit)
 
 

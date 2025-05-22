@@ -28,17 +28,17 @@ class ChatMessage(BaseModel):
     """Model for a single chat message."""
     role: ChatRole
     content: str
-    
+
     @classmethod
     def system(cls, content: str) -> "ChatMessage":
         """Create a system message."""
         return cls(role=ChatRole.SYSTEM, content=content)
-    
+
     @classmethod
     def user(cls, content: str) -> "ChatMessage":
         """Create a user message."""
         return cls(role=ChatRole.USER, content=content)
-    
+
     @classmethod
     def assistant(cls, content: str) -> "ChatMessage":
         """Create an assistant message."""
@@ -57,7 +57,7 @@ class OpenAIConfig(BaseModel):
     api_key: str = Field(..., description="The API key for Azure OpenAI service")
     azure_endpoint: str = Field(..., description="The base URL for Azure OpenAI resource")
     api_version: str = Field(..., description="The API version to use")
-    
+
     @classmethod
     def from_env(cls):
         """Load configuration from environment variables."""
@@ -74,7 +74,7 @@ class TranslationRequest(BaseModel):
     text: str = Field(..., description="Text to be translated")
     source_language: str = Field(..., description="Source language")
     target_language: str = Field(..., description="Target language")
-    
+
     model_config = ConfigDict(
         json_schema_extra={
             "examples": [
@@ -98,51 +98,51 @@ class TranslatorPlugins:
         logger.info("Translation Plugin init !!!!!!!!!!!! logger")
         self.config = OpenAIConfig.from_env()
         self.openai_client = AzureOpenAI(
-            api_key=self.config.api_key,  
+            api_key=self.config.api_key,
             azure_endpoint=self.config.azure_endpoint,
             api_version=self.config.api_version
         )
-        
-    @kernel_function(description="Translates spanish text to english.", name="translate_spanish_to_english")
-    async def translate_spanish_to_english(self, query_str: Annotated[str, "Strings in spanish to be translated to english."]) -> Annotated[str, "Translated string in english"]:
+
+    @kernel_function(description="Translates spanish text to english. Use this when spanish text is provided.", name="translate_spanish_to_english")
+    async def translate_spanish_to_english(self, query_str: Annotated[str, "Strings in spanish to be translated to english. Add nothing new."]) -> Annotated[str, "Translated string in english"]:
         logger.info("Translate spanish to english!!!!!!!!!!!! logger")
         translation_request = TranslationRequest(
             text=query_str,
             source_language="Spanish",
             target_language="English"
         )
-        
+
         return await self.translate(translation_request)
-    
-    @kernel_function(description="Translates japanese text to english.", name="translate_japanese_to_english")
-    async def translate_japanese_to_english(self, query_str: Annotated[str, "Strings in japanese to be translated to english."]) -> Annotated[str, "Translated string in english"]:
+
+    @kernel_function(description="Translates japanese text to english. Use this when japanese text is provided.", name="translate_japanese_to_english")
+    async def translate_japanese_to_english(self, query_str: Annotated[str, "Strings in japanese to be translated to english. Add nothing new."]) -> Annotated[str, "Translated string in english"]:
         logger.info("Translate japanese to english!!!!!!!!!!!! logger")
         translation_request = TranslationRequest(
             text=query_str,
             source_language="Japanese",
             target_language="English"
         )
-        
+
         return await self.translate(translation_request)
-    
-    @kernel_function(description="Translates hindi text to english.", name="translate_hindi_to_english")
-    async def translate_hindi_to_english(self, query_str: Annotated[str, "Strings in hindi to be translated to english."]) -> Annotated[str, "Translated string in english"]:
+
+    @kernel_function(description="Translates hindi text to english. Use this when hindi text is provided.", name="translate_hindi_to_english")
+    async def translate_hindi_to_english(self, query_str: Annotated[str, "Strings in hindi to be translated to english. Add nothing new."]) -> Annotated[str, "Translated string in english"]:
         logger.info("Translate hindi to english!!!!!!!!!!!! logger")
         translation_request = TranslationRequest(
             text=query_str,
             source_language="Hindi",
             target_language="English"
         )
-        
+
         return await self.translate(translation_request)
-    
-    @kernel_function(description="Only translates text between specified languages when 2 languages are provided.", name="translate")
+
+    @kernel_function(description="Only translates text between specified languages when 2 languages are provided by the user. Add nothing new.", name="translate")
     async def translate(self, request: TranslationRequest) -> str:
         logger.info("Generic Translate call!!!!!!!!!!!! logger")
         """Translate text between languages."""
         # Create structured messages using our new models
         messages = [
-            ChatMessage.system(f"You are a translator from {request.source_language} to {request.target_language}. Translate the following text."),
+            ChatMessage.system(f"You are a translator from {request.source_language} to {request.target_language}. Add nothing new. Translate the following text."),
             ChatMessage.user(request.text)
         ]
         # Create a chat completion request
@@ -153,7 +153,7 @@ class TranslatorPlugins:
         # Convert to dict for the API call
         response = self.openai_client.chat.completions.create(**chat_request.model_dump())
         translation = response.choices[0].message.content
-        
+
         result = TranslationResponse(
             translated_text=translation,
             source_language=request.source_language,
