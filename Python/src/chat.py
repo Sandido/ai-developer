@@ -10,6 +10,7 @@ from semantic_kernel.functions import KernelArguments
 from plugins.ai_search_plugin import AiSearchPlugin
 from plugins.translators_plugin import TranslatorPlugins
 from plugins.weather_plugins import WeatherPlugin
+from plugins.renamer_plugin import RenamerPlugin
 from openai import AzureOpenAI
 import os
 
@@ -42,7 +43,13 @@ def initialize_kernel():
     # kernel.add_plugin(AiSearchPlugin(kernel), plugin_name="AISearch")
 
     kernel.add_plugin(TranslatorPlugins(kernel), plugin_name="TranslatorPlugins", description="Translator Plugin to translate only non-english text.")
-
+    try:
+        kernel.add_plugin(RenamerPlugin(kernel), plugin_name="RenamerPlugin", description="Animal Renamer Plugin to change an animal name to its latin name.")
+    except Exception as e:
+        logger.error(f"Error adding RenamerPlugin: {e}")
+        print("Error adding RenamerPlugin:", e)
+        
+    print(" Renamer Plugin added to the kernel.")
     kernel.add_plugin(WeatherPlugin(kernel), plugin_name="WeatherPlugin", description="Weather Plugin to answer anything about Weather user inputs.")
 
     return kernel
