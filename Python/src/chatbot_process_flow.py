@@ -120,7 +120,7 @@ class ChatBotResponseStep(KernelProcessStep[ChatBotState]):
             service_id="process-framework"
         )
 
-        chat_history = ChatHistory()
+        chat_history = ChatHistory() # TODO this chat history doesn't work, remade each message, tsk example tsk.
         chat_history.add_user_message(user_message)
         response = await chat_service.get_chat_message_contents(
             chat_history=chat_history, settings=settings
