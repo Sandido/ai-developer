@@ -34,15 +34,26 @@ DIAGRAM = """
 flowchart LR
     A((Start)) --> R[Registration]
     R --> L[Lines]
-    L --> B[Bullpen&nbsp;Desk]
-    B --|Approved| W[Pre-Fight&nbsp;Waiting&nbsp;Area]
-    B --|Disapproved| P[Resolve&nbsp;Issues]
+    L --> B["Bullpen Desk"]
+
+    %% decision paths
+    B --Approved--> W["Pre-Fight Waiting Area"]
+    B --Rejected--> P["Resolve Issues"]
+
+    %% loop back for re-check
     P --> B
-    W --> F[Fight&nbsp;Rings]
-    F --|Injury&nbsp;(≈1%)| M[Medic]
+
+    %% toward the ring
+    W --> F["Fight Rings"]
+    F --Injury (1%)--> M[Medic]
+
+    %% ends
     F --> Z((End))
     M --> Z
 """
+
+
+
 async def main() -> None:
     # Generate SVG (change to "png" or "pdf" if you like)
     _, _, svg_bytes = await render_mermaid(DIAGRAM, output_format="svg")

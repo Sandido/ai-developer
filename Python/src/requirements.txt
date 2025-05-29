@@ -9,3 +9,5 @@ streamlit
 pydantic
 autogen-agentchat
 autogen-ext[openai,azure]
+
+mermaid-cli 

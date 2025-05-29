@@ -11,6 +11,7 @@ from plugins.ai_search_plugin import AiSearchPlugin
 from plugins.translators_plugin import TranslatorPlugins
 from plugins.weather_plugins import WeatherPlugin
 from plugins.renamer_plugin import RenamerPlugin
+from plugins.tournament_plugin import TournamentPlugin
 from openai import AzureOpenAI
 import os
 
@@ -26,7 +27,7 @@ chat_history = ChatHistory()
 
 def initialize_kernel():
     kernel = Kernel()
-    kernel.add_filter(FilterTypes.FUNCTION_INVOCATION, function_invocation_filter)
+    # kernel.add_filter(FilterTypes.FUNCTION_INVOCATION, function_invocation_filter)
 
     chat_completion_service = AzureChatCompletion(service_id="chat-completion")
     kernel.add_service(chat_completion_service)
@@ -51,6 +52,9 @@ def initialize_kernel():
         
     print(" Renamer Plugin added to the kernel.")
     kernel.add_plugin(WeatherPlugin(kernel), plugin_name="WeatherPlugin", description="Weather Plugin to answer anything about Weather user inputs.")
+
+    print("adding tournament plugin")
+    kernel.add_plugin(TournamentPlugin(kernel), plugin_name="TournamentPlugin", description="Tournament Plugin to run a tournament for a fighter. Start when a fighter is present.")
 
     return kernel
 
