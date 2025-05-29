@@ -25,7 +25,8 @@ load_dotenv(override=True)
 
 chat_history = ChatHistory()
 
-def initialize_kernel():
+from typing import Callable, Optional
+def initialize_kernel(notify: Optional[Callable[[str], None]] = None):
     kernel = Kernel()
     # kernel.add_filter(FilterTypes.FUNCTION_INVOCATION, function_invocation_filter)
 
@@ -54,7 +55,7 @@ def initialize_kernel():
     kernel.add_plugin(WeatherPlugin(kernel), plugin_name="WeatherPlugin", description="Weather Plugin to answer anything about Weather user inputs.")
 
     print("adding tournament plugin")
-    kernel.add_plugin(TournamentPlugin(kernel), plugin_name="TournamentPlugin", description="Tournament Plugin to run a tournament for a fighter. Start when a fighter is present.")
+    kernel.add_plugin(TournamentPlugin(kernel, notify=notify), plugin_name="TournamentPlugin", description="Tournament Plugin to run a tournament for a fighter. Start when a fighter is present.")
 
     return kernel
 
@@ -69,9 +70,9 @@ async def function_invocation_filter(
     # this runs after our functions has been called
     print(f"  ---> Plugin response from [{context.function.plugin_name}.{context.function.name} is `{context.result}`")
 
-async def process_message(user_input):
+async def process_message(user_input, notify=None):
     logger.info(f"Processing user message: {user_input}")
-    kernel = initialize_kernel()
+    kernel = initialize_kernel(notify)
 
     chat_function = kernel.add_function(
         prompt=( # seems like adding a system prompt helps prevent plugins from being used correctly.

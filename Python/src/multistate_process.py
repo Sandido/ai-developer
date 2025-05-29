@@ -1,7 +1,6 @@
 import os
 import asyncio
 from enum import Enum
-import mermaid as md
 import logging
 from dotenv import load_dotenv
 
@@ -22,12 +21,6 @@ from semantic_kernel.processes.kernel_process.kernel_process_step_state import (
 from semantic_kernel.processes.local_runtime.local_event import KernelProcessEvent
 from semantic_kernel.processes.local_runtime.local_kernel_process import start
 from semantic_kernel.processes.process_builder import ProcessBuilder
-
-from typing import Awaitable, Callable
-from semantic_kernel.filters import FilterTypes, FunctionInvocationContext
-
-import mermaid as md
-from mermaid.graph import Graph
 
 from typing import Awaitable, Callable
 from semantic_kernel.filters import FilterTypes, FunctionInvocationContext

@@ -1,7 +1,6 @@
 import os
 import asyncio
 from enum import Enum
-import mermaid as md
 
 from semantic_kernel import Kernel
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
@@ -23,9 +22,6 @@ from semantic_kernel.processes.process_builder import ProcessBuilder
 
 from typing import Awaitable, Callable
 from semantic_kernel.filters import FilterTypes, FunctionInvocationContext
-
-import mermaid as md
-from mermaid.graph import Graph
 
 # Define the events our process will use
 class HelloWorldEvents(Enum):

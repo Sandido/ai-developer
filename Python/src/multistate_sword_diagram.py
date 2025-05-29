@@ -56,10 +56,10 @@ flowchart LR
 
 async def main() -> None:
     # Generate SVG (change to "png" or "pdf" if you like)
-    _, _, svg_bytes = await render_mermaid(DIAGRAM, output_format="svg")
-    out_file = "tournament_flow.svg"
+    _, _, png_bytes = await render_mermaid(DIAGRAM, output_format="png")
+    out_file = "tournament_flow.png"
     with open(out_file, "wb") as f:
-        f.write(svg_bytes)
+        f.write(png_bytes)
     print(f"Diagram saved to {out_file}")
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ from chat import process_message, reset_chat_history
 from multi_agent import run_multi_agent
 
 #Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def configure_sidebar():
     """Configure the sidebar with navigation options"""
@@ -65,7 +65,7 @@ def chat():
                 st.session_state.chat_history.append({"role": "user", "message": user_input})
                 with st.spinner("Processing your request.."):
                     # Get assistant's response
-                    assistant_response = asyncio.run(process_message(user_input))
+                    assistant_response = asyncio.run(process_message(user_input, notify=notify_ui))
                 st.session_state.chat_history.append({"role": "assistant", "message": assistant_response})
             except Exception as e:
                 logging.error(f"Error processing message: {e}")
@@ -98,6 +98,27 @@ def multi_agent():
         display_chat_history(st.session_state.multi_agent_history)
 
     render_chat_ui("Multi-Agent", on_multi_agent_submit)
+
+def get_tournament_placeholder():
+    """One container that every plugin message appends to."""
+    if "tournament_box" not in st.session_state:
+        st.session_state.tournament_box = st.empty()
+    return st.session_state.tournament_box
+
+
+def notify_ui(msg: str) -> None:
+    """Callback the plugin uses to stream updates into Streamlit."""
+    box = get_tournament_placeholder()
+
+    # retrieve what we've already shown, or start fresh
+    prev_text = st.session_state.get("tournament_log", "")
+    new_text  = prev_text + ("\n\n" if prev_text else "") + msg
+
+    # remember the new full log
+    st.session_state.tournament_log = new_text
+
+    # display it
+    box.markdown(new_text)
 
 
 def display_chat_history(chat_history):

@@ -27,8 +27,8 @@ TRANSLATOR_INSTRUCTIONS = "Your role in this collaboration is: You are a transla
 
 TERMINATOR_INSTRUCTIONS = "Your role in this collaboration is: After the Translator Agent translates a string, return the string &&&. \
                         Prepend your response with the string Terminator Agent: "
-# after testing, the agents don't know which agent just ran inherently. Maybe we can add it to the user messages. 
-# Not even then does the terminator agent work. 
+# after testing, the agents don't know which agent just ran inherently. Maybe we can add it to the user messages.
+# Not even then does the terminator agent work.
 
 from plugins.translators_plugin import TranslatorPlugins
 
@@ -63,12 +63,12 @@ async def run_multi_agent(input: str):
     kernel.add_service(AzureChatCompletion(service_id=service_id_teacher))
     settings = kernel.get_prompt_execution_settings_from_service_id(service_id=service_id_teacher)
     settings.function_choice_behavior = FunctionChoiceBehavior.Auto()
-    
+
     kernel.add_filter(FilterTypes.FUNCTION_INVOCATION, function_invocation_filter)
 
     # kernel.add_plugin(TranslatorPlugins(kernel), plugin_name="TranslatorPlugins")
-    
-    
+
+
     # original ones I was working with
     # rookie_agent = ChatCompletionAgent(
     #     id=service_id_rookie,
@@ -87,7 +87,7 @@ async def run_multi_agent(input: str):
     #     agents=[ translator_agent],
     #     termination_strategy=ApprovalTerminationStrategy(agents=[translator_agent], maximum_iterations=6),
     # )
-    
+
 
     # Create a writer agent that generates content
     writer = ChatCompletionAgent(
@@ -101,12 +101,12 @@ async def run_multi_agent(input: str):
         3. Incorporate feedback from the editor and fact-checker to improve your writing
         4. Revise content to address issues raised by other team members
         5. Focus on creating a compelling narrative voice and structure
-        
+
         When responding to feedback:
         - Be open to constructive criticism
         - Explain your creative choices when relevant
         - Incorporate suggestions that improve the content
-        
+
         Always strive to maintain the core message while making the content more engaging and effective. Keep your responses very concise, imaginative and engaging.""",
     )
 
@@ -122,13 +122,13 @@ async def run_multi_agent(input: str):
         3. Suggest improvements to enhance readability and impact
         4. Ensure the content meets its intended purpose and audience needs
         5. Maintain consistent voice and tone throughout
-        
+
         When providing feedback:
         - Be specific about what needs improvement and why
         - Offer constructive suggestions rather than just criticism
         - Consider both micro (sentence-level) and macro (structure) improvements
         - Balance preserving the writer's voice with improving the content
-        
+
         Your goal is to elevate the writing while respecting the writer's intent and style. Keep your responses very concise, clear and straightforward.""",
     )
 
@@ -144,13 +144,13 @@ async def run_multi_agent(input: str):
         3. Suggest corrections for any factual errors
         4. Recommend additional context where needed for accuracy
         5. Ensure the content is truthful and well-supported
-        
+
         When providing feedback:
         - Focus on accuracy rather than style or structure
         - Explain why a statement might be problematic
         - Provide correct information to replace inaccuracies
         - Consider potential sources of factual support
-        
+
         Your goal is to ensure the content maintains high standards of accuracy and integrity. Keep your responses very concise, clear and straightforward.""",
     )
 
