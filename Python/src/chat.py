@@ -13,6 +13,7 @@ from plugins.weather_plugins import WeatherPlugin
 from plugins.renamer_plugin import RenamerPlugin
 from plugins.tournament_plugin import TournamentPlugin
 from plugins.handoff_plugin import CustomerSupportTriagePlugin
+from plugins.translation_pipeline_plugin import TranslationPipelinePlugin
 from openai import AzureOpenAI
 import os
 
@@ -45,7 +46,7 @@ def initialize_kernel(notify: Optional[Callable[[str], None]] = None):
 
     # kernel.add_plugin(AiSearchPlugin(kernel), plugin_name="AISearch")
 
-    kernel.add_plugin(TranslatorPlugins(kernel), plugin_name="TranslatorPlugins", description="Translator Plugin to translate only non-english text.")
+    # kernel.add_plugin(TranslatorPlugins(kernel), plugin_name="TranslatorPlugins", description="Translator Plugin to translate only non-english text.")
     try:
         kernel.add_plugin(RenamerPlugin(kernel), plugin_name="RenamerPlugin", description="Animal Renamer Plugin to change an animal name to its latin name.")
     except Exception as e:
@@ -60,6 +61,9 @@ def initialize_kernel(notify: Optional[Callable[[str], None]] = None):
 
     print("adding handoff plugin")
     kernel.add_plugin(CustomerSupportTriagePlugin(kernel), plugin_name="CustomerSupportTriagePlugin", description="This plugin handles Customer Support questions about orders the customer has made.")
+    
+    print("adding translator handoff plugin")
+    kernel.add_plugin(TranslationPipelinePlugin(kernel), plugin_name="TranslationPipelinePlugin", description="This plugin handles translations from english.")
 
     
     return kernel

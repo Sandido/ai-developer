@@ -134,7 +134,7 @@ def main():
     """Main function to run the app."""
     # st.set_page_config(page_title="AI Workshop", layout="wide")
     chosen_operation = configure_sidebar()
-    st.markdown("<h2 style='text-align:center;'>Welcome to the AI Workshop for Developers</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align:center;'>Welcome to Adam's AI Agent Playtest</h2>", unsafe_allow_html=True)
     if chosen_operation == "Chat":
         chat()
     elif chosen_operation == "Multi-Agent":
