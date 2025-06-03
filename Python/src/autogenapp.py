@@ -1,3 +1,5 @@
+# TODO: this file is a work in progress, it is not functional yet.
+
 from autogen_agentchat.agents import AssistantAgent
 from autogen_agentchat.teams import DiGraphBuilder, GraphFlow
 from autogen_ext.models.openai import OpenAIChatCompletionClient
