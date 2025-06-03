@@ -14,6 +14,7 @@ from plugins.renamer_plugin import RenamerPlugin
 from plugins.tournament_plugin import TournamentPlugin
 from plugins.handoff_plugin import CustomerSupportTriagePlugin
 from plugins.translation_pipeline_plugin import TranslationPipelinePlugin
+from plugins.handoff_tournament import TournamentHandoffPlugin
 from openai import AzureOpenAI
 import os
 
@@ -53,11 +54,11 @@ def initialize_kernel(notify: Optional[Callable[[str], None]] = None):
         logger.error(f"Error adding RenamerPlugin: {e}")
         print("Error adding RenamerPlugin:", e)
         
-    print(" Renamer Plugin added to the kernel.")
+    print("Renamer Plugin added to the kernel.")
     kernel.add_plugin(WeatherPlugin(kernel), plugin_name="WeatherPlugin", description="Weather Plugin to answer anything about Weather user inputs.")
 
-    print("adding tournament plugin")
-    kernel.add_plugin(TournamentPlugin(kernel, notify=notify), plugin_name="TournamentPlugin", description="Tournament Plugin to run a tournament for a fighter. Start when a fighter is present.")
+    # print("adding tournament plugin")
+    # kernel.add_plugin(TournamentPlugin(kernel, notify=notify), plugin_name="TournamentPlugin", description="Tournament Plugin to run a tournament for a fighter. Start when a fighter is present.")
 
     print("adding handoff plugin")
     kernel.add_plugin(CustomerSupportTriagePlugin(kernel), plugin_name="CustomerSupportTriagePlugin", description="This plugin handles Customer Support questions about orders the customer has made.")
@@ -65,7 +66,9 @@ def initialize_kernel(notify: Optional[Callable[[str], None]] = None):
     print("adding translator handoff plugin")
     kernel.add_plugin(TranslationPipelinePlugin(kernel), plugin_name="TranslationPipelinePlugin", description="This plugin handles translations from english.")
 
-    
+    print("adding tournament handoff plugin")
+    kernel.add_plugin(TournamentHandoffPlugin(kernel), plugin_name="TournamentHandoffPlugin", description="This plugin handles users here to fight in our fencing tournament.")
+
     return kernel
 
 async def function_invocation_filter(
