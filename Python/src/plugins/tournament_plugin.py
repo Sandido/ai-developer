@@ -341,7 +341,7 @@ async def run_tournament_flow(notify):
             data=initial_state               # ← here
         ),
     )
-    return f"Tournament summary is ready.\n{initial_state.summary}"    
+    return f"Tournament summary is ready.\n{initial_state.summary}"
 
 # if __name__ == "__main__":
 #     asyncio.run(run_tournament_flow())

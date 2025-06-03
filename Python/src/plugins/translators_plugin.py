@@ -69,7 +69,6 @@ class OpenAIConfig(BaseModel):
         )
 
 class TranslationRequest(BaseModel):
-    print("TranslationRequest model!!!!!!!!!!!!")
     """Model for translation requests."""
     text: str = Field(..., description="Text to be translated")
     source_language: str = Field(..., description="Source language")

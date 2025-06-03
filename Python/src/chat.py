@@ -12,6 +12,7 @@ from plugins.translators_plugin import TranslatorPlugins
 from plugins.weather_plugins import WeatherPlugin
 from plugins.renamer_plugin import RenamerPlugin
 from plugins.tournament_plugin import TournamentPlugin
+from plugins.handoff_plugin import CustomerSupportTriagePlugin
 from openai import AzureOpenAI
 import os
 
@@ -57,6 +58,10 @@ def initialize_kernel(notify: Optional[Callable[[str], None]] = None):
     print("adding tournament plugin")
     kernel.add_plugin(TournamentPlugin(kernel, notify=notify), plugin_name="TournamentPlugin", description="Tournament Plugin to run a tournament for a fighter. Start when a fighter is present.")
 
+    print("adding handoff plugin")
+    kernel.add_plugin(CustomerSupportTriagePlugin(kernel), plugin_name="CustomerSupportTriagePlugin", description="This plugin handles Customer Support questions about orders the customer has made.")
+
+    
     return kernel
 
 async def function_invocation_filter(

@@ -45,11 +45,11 @@ class OpenAIConfig(BaseModel):
             azure_endpoint=os.environ['AZURE_OPENAI_ENDPOINT'],
             api_version=os.environ['AZURE_OPENAI_API_VERSION']
         )
-        
+
 class RenameModel(BaseModel):
     animal: str
     latin_animal: str
-    
+
 settings = OpenAIChatPromptExecutionSettings()
 settings.response_format = RenameModel
 
@@ -73,12 +73,12 @@ class RenamerPlugin:
             instructions="Only translate the animal word to its latin version. Add no other text.",
             arguments=KernelArguments(settings),
         )
-        
-        
-        ## example below of how to use chathistoryThreadAgent. 
+
+
+        ## example below of how to use chathistoryThreadAgent.
         # Not needed as my ChatHistory works much better.
         thread: ChatHistoryAgentThread = None
-        
+
         user_messages = [
             "lion",
             "manatee",
@@ -87,11 +87,11 @@ class RenamerPlugin:
 
         for user_message in user_messages:
             print("*** User:", user_message)
-            
+
             # get our response from the agent
             response = await simple_agent.get_response(messages=user_message, thread=thread)
             print("*** Agent:", response.content)
-            
+
             # save the thread with all the existing messages and responses
             thread = response.thread
 
@@ -100,9 +100,9 @@ class RenamerPlugin:
         async for m in thread.get_messages():
             print(m.role, m.content)
         ## Example above
-            
-            
-        
+
+
+
         response = await simple_agent.get_response(messages=query_str)
         print("Agent RESPONSE:", response.content)
         return response.content
