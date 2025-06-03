@@ -1,20 +1,19 @@
 """
-Translation Pipeline Plugin
-===========================
-Exposes **translate_en_to_fr** as a Semantic‑Kernel kernel‑function. It
-translates an English sentence through the chain:
+Translation Pipeline Plugin – Interactive Handoff
+================================================
+This version turns the pipeline into an **interactive translator** driven by a
+Router agent.  Flow:
 
-```
-English -> Hindi -> Japanese -> Spanish -> Portuguese -> French
-```
+1. **RouterAgent** – if the user hasn’t specified a language, asks which of the
+   supported languages they want (Hindi, Japanese, Spanish, Portuguese, French)
+   and ends with `HANDOFF: <TargetAgent>`.
+2. **Target translator agents** (e.g. `English_to_Hindi`) – translate the
+   user’s English sentence into their language, then ask if the user wants
+   another translation.  They finish with `HANDOFF: RouterAgent` (or
+   `HANDOFF: END` if the user says “stop”).
 
-For each hop we spin up a dedicated `ChatCompletionAgent` and stream every
-intermediate translation back to the caller.  If any step fails (timeout or
-Azure content‑filter) we inject a `System:` message and skip the remaining
-hops while still returning whatever translations succeeded so far.
-
-**Note:** All arrow symbols use the ASCII sequence `->` (no Unicode arrows) so
-this file can be processed by tools that reject non‑ASCII characters.
+The hand‑off graph lets the Router send the conversation to any translator, and
+lets every translator hand back to the Router.
 """
 
 from __future__ import annotations
@@ -30,7 +29,13 @@ from pydantic import BaseModel, Field
 from semantic_kernel import Kernel
 from semantic_kernel.functions import kernel_function
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
-from semantic_kernel.agents import ChatCompletionAgent
+from semantic_kernel.agents import (
+    ChatCompletionAgent,
+    HandoffOrchestration,
+    OrchestrationHandoffs,
+)
+from semantic_kernel.agents.runtime import InProcessRuntime
+from semantic_kernel.contents import ChatMessageContent
 from semantic_kernel.connectors.ai.open_ai.exceptions.content_filter_ai_exception import (
     ContentFilterAIException,
 )
@@ -39,7 +44,7 @@ logger = logging.getLogger(__name__)
 load_dotenv(override=True)
 
 # ---------------------------------------------------------------------------
-# Azure‑OpenAI config helper
+# Optional Azure‑OpenAI config helper
 # ---------------------------------------------------------------------------
 
 class OpenAIConfig(BaseModel):
@@ -58,112 +63,108 @@ class OpenAIConfig(BaseModel):
         )
 
 
+SUPPORTED = {
+    "Hindi": "English_to_Hindi",
+    "Japanese": "English_to_Japanese",
+    "Spanish": "English_to_Spanish",
+    "Portuguese": "English_to_Portuguese",
+    "French": "English_to_French",
+}
+
 # ---------------------------------------------------------------------------
 # Main plugin class
 # ---------------------------------------------------------------------------
 
 class TranslationPipelinePlugin:
-    """Kernel plugin exposing the English->...->French pipeline."""
+    """Interactive translator via SK hand‑off orchestration."""
 
-    TIMEOUT_SECONDS = 15
+    TIMEOUT_SECONDS = 30
 
     def __init__(self, kernel: Kernel):
         self.kernel = kernel
         self.config = OpenAIConfig.from_env()
 
-    # Utility – quick agent factory -------------------------------------
-    def _mk_agent(self, name: str, instructions: str) -> ChatCompletionAgent:
+    # Helper to create translator agent ---------------------------------
+    def _translator(self, lang: str) -> ChatCompletionAgent:
+        name = SUPPORTED[lang]
+        remaining_langs = [l for l in SUPPORTED.keys() if l != lang]
+        ask_more = (
+            "If the user wants another translation, ask them which of the following languages they want next: "
+            + ", ".join(remaining_langs)
+            + ". If they say 'stop', end with 'HANDOFF: END', else end with 'HANDOFF: RouterAgent'."
+        )
+        instructions = (
+            f"Translate strictly from English to {lang}. Return only the {lang} text.\n"
+            + ask_more
+        )
         return ChatCompletionAgent(
             name=name,
-            description=instructions.split(".")[0],
+            description=f"Translates English to {lang}",
+            instructions=instructions,
+            service=AzureChatCompletion(),
+        )
+
+    # Router agent ------------------------------------------------------
+    def _router(self) -> ChatCompletionAgent:
+        language_list = ", ".join(SUPPORTED.keys())
+        instructions = (
+            "You are the router. If the user message includes an explicit target language (" + language_list + "), "
+            "reply ONLY with 'HANDOFF: <AgentName>' where <AgentName> is the correct translator.\n"
+            "If the user says 'stop', reply 'HANDOFF: END'.\n"
+            "If no language specified, ask the user: 'Which language would you like? [" + language_list + "]' and end with 'HANDOFF: RouterAgent'."
+        )
+        return ChatCompletionAgent(
+            name="RouterAgent",
+            description="Routes requests to language‑specific translators",
             instructions=instructions,
             service=AzureChatCompletion(),
         )
 
     # ------------------------------------------------------------------
-    # Kernel function entry‑point
+    # Kernel entry‑point
     # ------------------------------------------------------------------
 
-    @kernel_function(
-        name="translate_en_to_fr",
-        description="Translate English -> Hindi -> Japanese -> Spanish -> Portuguese -> French and return all intermediate translations.",
-    )
-    async def translate_en_to_fr(
+    @kernel_function(name="interactive_translate", description="Interactively translate English text to user‑selected languages.")
+    async def interactive_translate(
         self,
-        text: Annotated[str, "English text to translate"],
-    ) -> Annotated[str, "Multi‑line string with translations for every hop."]:
-        # Build agents ---------------------------------------------------
-        en_hi = self._mk_agent(
-            "English_to_Hindi",
-            "Translate strictly from English to Hindi. Return only the Hindi text.",
-        )
-        hi_ja = self._mk_agent(
-            "Hindi_to_Japanese",
-            "Translate strictly from Hindi to Japanese. Return only the Japanese text.",
-        )
-        ja_es = self._mk_agent(
-            "Japanese_to_Spanish",
-            "Translate strictly from Japanese to Spanish. Return only the Spanish text.",
-        )
-        es_pt = self._mk_agent(
-            "Spanish_to_Portuguese",
-            "Translate strictly from Spanish to Portuguese. Return only the Portuguese text.",
-        )
-        pt_fr = self._mk_agent(
-            "Portuguese_to_French",
-            "Translate strictly from Portuguese to French. Return only the French text.",
+        text: Annotated[str, "English text or a command like 'stop'."],
+    ) -> Annotated[str, "Conversation log of the interactive translation."]:
+        # Build agents --------------------------------------------------
+        router = self._router()
+        translators = {lang: self._translator(lang) for lang in SUPPORTED}
+
+        # Handoff graph: Router -> any translator, each translator -> Router ---
+        handoffs = OrchestrationHandoffs()
+        for lang, agent_name in SUPPORTED.items():
+            handoffs.add(source_agent=router.name, target_agent=agent_name)
+            handoffs.add(source_agent=agent_name, target_agent=router.name)
+        # Final END agent (implicit) not needed; orchestration ends when no handoff
+
+        # Collect messages ---------------------------------------------
+        convo: List[str] = []
+
+        def _cb(msg: ChatMessageContent):
+            convo.append(f"{msg.name}: {msg.content}")
+
+        orch = HandoffOrchestration(
+            members=[router, *translators.values()],
+            handoffs=handoffs,
+            agent_response_callback=_cb,
+            human_response_function=lambda: ChatMessageContent.from_user(input("User: ")),  # basic CLI prompt
         )
 
-        # Safe‑translate helper that **always returns str** -------------
-        async def _safe_translate(agent: ChatCompletionAgent, src: str) -> str:
+        runtime = InProcessRuntime()
+        runtime.start()
+
+        try:
+            res = await orch.invoke(task=text, runtime=runtime)
+            await asyncio.wait_for(res.get(), timeout=self.TIMEOUT_SECONDS)
+        except Exception as ex:
+            convo.append(f"System: Error – {ex}")
+        finally:
             try:
-                response = await asyncio.wait_for(
-                    agent.get_response(messages=src),
-                    timeout=self.TIMEOUT_SECONDS,
-                )
-                content_obj = getattr(response, "content", response)
-                if isinstance(content_obj, str):
-                    text_out = content_obj
-                else:
-                    text_out = getattr(content_obj, "content", str(content_obj))
-                return text_out.strip()
-            except asyncio.TimeoutError:
-                msg = f"System: {agent.name} timed out after {self.TIMEOUT_SECONDS}s."
-                logger.error(msg)
-                return msg
-            except ContentFilterAIException as cf_ex:
-                msg = (
-                    f"System: Azure content filter blocked a response from {agent.name}. "
-                    "Please adjust your input."
-                )
-                logger.warning("Content filter hit: %s", cf_ex)
-                return msg
-            except Exception as ex:
-                logger.exception("Unexpected error in %s: %s", agent.name, ex)
-                return f"System: {agent.name} encountered an error."
+                await runtime.stop_when_idle()
+            except Exception:
+                pass
 
-        # Helper to chain steps -----------------------------------------
-        async def _step(prev_text: str, agent: ChatCompletionAgent) -> str:
-            if prev_text.startswith("System:"):
-                return "System: Skipped due to previous error."
-            return await _safe_translate(agent, prev_text)
-
-        # Pipeline execution --------------------------------------------
-        conversation: List[str] = []
-
-        hindi = await _safe_translate(en_hi, text)
-        conversation.append(f"{en_hi.name}: {hindi}")
-
-        japanese = await _step(hindi, hi_ja)
-        conversation.append(f"{hi_ja.name}: {japanese}")
-
-        spanish = await _step(japanese, ja_es)
-        conversation.append(f"{ja_es.name}: {spanish}")
-
-        portuguese = await _step(spanish, es_pt)
-        conversation.append(f"{es_pt.name}: {portuguese}")
-
-        french = await _step(portuguese, pt_fr)
-        conversation.append(f"{pt_fr.name}: {french}")
-
-        return "\n".join(conversation)
+        return "\n".join(convo)
