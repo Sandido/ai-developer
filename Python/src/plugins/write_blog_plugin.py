@@ -1,38 +1,21 @@
 """
 Used as learning reference for Sequential Selection Strategy and AgentGroupChat.
 """
-
-import os
-from typing import TypedDict, Annotated, Literal, List
-from enum import Enum
-from semantic_kernel.functions import kernel_function
-from semantic_kernel.connectors.memory.azure_ai_search import AzureAISearchCollection, AzureAISearchStore
-from semantic_kernel.data.vector_search import VectorSearchOptions
 from semantic_kernel import Kernel
 
-from models.employee_handbook_model import EmployeeHandbookModel
-from openai import AzureOpenAI
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field, validator, ConfigDict
 import logging
 
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.agents import ChatCompletionAgent
-from semantic_kernel.agents import ChatHistoryAgentThread
 
-
-from typing import Annotated
-from pydantic import BaseModel
-from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, OpenAIChatPromptExecutionSettings
+from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.agents import ChatCompletionAgent, AgentGroupChat
-from semantic_kernel.functions import kernel_function, KernelArguments
 from semantic_kernel.agents.strategies import DefaultTerminationStrategy, SequentialSelectionStrategy
 
 
 # Add Logger
 logger = logging.getLogger(__name__)
-
-
 load_dotenv(override=True)
 
 class WriteBlogPlugin:

@@ -2,9 +2,8 @@
 Geocoding Agent for testing using an external API.
 """
 
-from typing import TypedDict, Annotated, Optional
+from typing import Annotated
 import requests
-import asyncio
 from semantic_kernel.functions import kernel_function
 import os
 from dotenv import load_dotenv

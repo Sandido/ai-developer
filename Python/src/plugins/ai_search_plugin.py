@@ -5,7 +5,7 @@ Can easily point it to a different index for different subject matter.
 """
 
 import os
-from typing import TypedDict, Annotated
+from typing import Annotated
 from semantic_kernel.functions import kernel_function
 from semantic_kernel.connectors.memory.azure_ai_search import AzureAISearchCollection, AzureAISearchStore
 from semantic_kernel.data.vector_search import VectorSearchOptions

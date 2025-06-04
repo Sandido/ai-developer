@@ -26,7 +26,7 @@ from semantic_kernel.agents import (
     OrchestrationHandoffs,
 )
 from semantic_kernel.agents.runtime import InProcessRuntime
-from semantic_kernel.contents import ChatMessageContent, AuthorRole
+from semantic_kernel.contents import ChatMessageContent
 
 from semantic_kernel.connectors.ai.open_ai.exceptions.content_filter_ai_exception import (
     ContentFilterAIException,

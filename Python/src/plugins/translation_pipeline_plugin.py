@@ -16,7 +16,7 @@ The hand‑off graph lets the Router send the conversation to any translator, an
 lets every translator hand back to the Router.
 
 The results of this have been tricky. The handoff logic needs to be much more specific to ensure each later agent
-is called correctly. 
+is called correctly.
 DELETE.
 """
 
@@ -40,9 +40,6 @@ from semantic_kernel.agents import (
 )
 from semantic_kernel.agents.runtime import InProcessRuntime
 from semantic_kernel.contents import ChatMessageContent
-from semantic_kernel.connectors.ai.open_ai.exceptions.content_filter_ai_exception import (
-    ContentFilterAIException,
-)
 
 logger = logging.getLogger(__name__)
 load_dotenv(override=True)

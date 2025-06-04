@@ -5,17 +5,14 @@ Can auto detect which agent to use well, and responds to specific language trans
 """
 
 import os
-from typing import TypedDict, Annotated, Literal, List
+from typing import Annotated, List
 from enum import Enum
 from semantic_kernel.functions import kernel_function
-from semantic_kernel.connectors.memory.azure_ai_search import AzureAISearchCollection, AzureAISearchStore
-from semantic_kernel.data.vector_search import VectorSearchOptions
 from semantic_kernel import Kernel
 
-from models.employee_handbook_model import EmployeeHandbookModel
 from openai import AzureOpenAI
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field, validator, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict
 import logging
 # Add Logger
 logger = logging.getLogger(__name__)

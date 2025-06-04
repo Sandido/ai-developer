@@ -8,13 +8,12 @@ This is to learn the semantic_kernel.processes module and how to build
 an interactive process that is EXPLICITLY and RIGIDLY mapped out with different Agents. 
 """
 
-from typing import TypedDict, Annotated, Optional
-import requests
+from typing import Optional
 from semantic_kernel.functions import kernel_function
 import os
 from dotenv import load_dotenv
 
-import os, asyncio, logging, random
+import os, logging, random
 from enum import Enum
 from typing import Callable, Optional
 
