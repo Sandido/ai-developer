@@ -14,6 +14,10 @@ Router agent.  Flow:
 
 The hand‑off graph lets the Router send the conversation to any translator, and
 lets every translator hand back to the Router.
+
+The results of this have been tricky. The handoff logic needs to be much more specific to ensure each later agent
+is called correctly. 
+DELETE.
 """
 
 from __future__ import annotations

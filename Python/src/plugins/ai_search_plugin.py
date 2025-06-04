@@ -1,3 +1,9 @@
+"""
+AI Search agent plugin for Semantic Kernel.
+Used to access info about the employee handbook specifically.
+Can easily point it to a different index for different subject matter.
+"""
+
 import os
 from typing import TypedDict, Annotated
 from semantic_kernel.functions import kernel_function
@@ -20,7 +26,7 @@ class AiSearchPlugin:
                 return response[0]
 
     @kernel_function(description="Gets query for Employee handbook data, data consists of mission, values,performance review, workplace safety, workplace violence, Training, Privacy, whistleblower policy and data security, job roles", name="get_employeehandbook_response")
-    async def get_employeehandbook_response(self, query_str: Annotated[str, "Query about employee handbook"]) -> Annotated[str, "Response for the query"]:     
+    async def get_employeehandbook_response(self, query_str: Annotated[str, "Query about employee handbook"]) -> Annotated[str, "Response for the query"]:
 
         # Generate a vector for your search text.
         # Just showing a placeholder method here for brevity.
@@ -31,8 +37,8 @@ class AiSearchPlugin:
         store = AzureAISearchStore(
             api_key=os.getenv("AZURE_AI_SEARCH_KEY"),
             search_endpoint=os.getenv("AZURE_AI_SEARCH_ENDPOINT")
-        )       
-        
+        )
+
         collection: AzureAISearchCollection = store.get_collection(collection_name="employeehandbook",data_model_type=EmployeeHandbookModel)
 
         search_results = await collection.vectorized_search(

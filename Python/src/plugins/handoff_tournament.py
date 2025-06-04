@@ -1,14 +1,10 @@
 """
-Customer Support Triage Plugin
-==============================
-Exposes **handle_customer_query** as a Semantic‑Kernel *kernel function* that
-instantiates a mini customer‑support triage orchestration (triage → refund /
-status / return agents).  The function is designed to be called from an outer
-chat workflow and now includes robust error‑handling and a *hard timeout* so
-callers are never left hanging.  Any timeout / safety‑filter event is surfaced
-back to the caller both as the function return value **and** as a synthetic
-"System:" message injected into the agent callback stream so that a live chat
-UI immediately displays the issue.
+Tournament Contextual Handoff agent.
+This agent handles a fighter's journey through a tournament,
+but without a manual explicit call from one agent to the next like in the Sequential example.
+This one uses descriptions (like semantic kernel plugin descriptions) to route the user to the next agent
+given the appropriate context.
+It will also dynamically skip steps if you provide the requisite info for previous steps.
 """
 
 from __future__ import annotations
@@ -54,29 +50,6 @@ class OpenAIConfig(BaseModel):
             api_version=os.environ["AZURE_OPENAI_API_VERSION"],
         )
 
-
-# ---------------------------------------------------------------------------
-# Helper plugins used by specialised agents
-# ---------------------------------------------------------------------------
-
-class OrderStatusPlugin:
-    @kernel_function(name="check_order_status", description="Return shipping status for an order ID")
-    def check_order_status(self, order_id: str) -> str:
-        return f"Order {order_id} is shipped and will arrive in 2‑3 days."
-
-
-class OrderRefundPlugin:
-    @kernel_function(name="process_refund", description="Refund an order if applicable")
-    def process_refund(self, order_id: str, reason: str) -> str:
-        logger.info("Processing refund – order=%s reason=%s", order_id, reason)
-        return f"Refund for order {order_id} has been processed successfully."
-
-
-class OrderReturnPlugin:
-    @kernel_function(name="process_return", description="Create a return authorisation")
-    def process_return(self, order_id: str, reason: str) -> str:
-        logger.info("Processing return – order=%s reason=%s", order_id, reason)
-        return f"Return for order {order_id} has been processed successfully."
 
 
 # ---------------------------------------------------------------------------

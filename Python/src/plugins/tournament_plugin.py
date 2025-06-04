@@ -1,3 +1,13 @@
+"""
+This agent models a fencing tournament flow, where a fighter goes through
+various steps from registration to the final fight, with potential gear checks
+and injury handling. The flow is designed to be interactive, allowing the
+fighter to input their name, gear, and respond to prompts at each step.
+
+This is to learn the semantic_kernel.processes module and how to build
+an interactive process that is EXPLICITLY and RIGIDLY mapped out with different Agents. 
+"""
+
 from typing import TypedDict, Annotated, Optional
 import requests
 from semantic_kernel.functions import kernel_function

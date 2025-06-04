@@ -1,4 +1,7 @@
 """
+Learning reference from: https://github.com/Azure-Samples/semantic-kernel-workshop
+Converted to a plugin instead of a straight script call, mostly to learn for the handoff_tournament plugin.
+
 Customer Support Triage Plugin
 ==============================
 Exposes **handle_customer_query** as a Semantic‑Kernel *kernel function* that

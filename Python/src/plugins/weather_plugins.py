@@ -1,4 +1,4 @@
-# TODO: placeholder plugin for now
+# TODO: placeholder plugin for now. This is another external API plugin.
 
 from semantic_kernel import Kernel
 from semantic_kernel.functions import KernelArguments

@@ -1,3 +1,9 @@
+"""
+Translator Plugin for Semantic Kernel.
+Using multiple different agents for different languages. 
+Can auto detect which agent to use well, and responds to specific language translation requests.
+"""
+
 import os
 from typing import TypedDict, Annotated, Literal, List
 from enum import Enum
